@@ -1,0 +1,86 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+data=pd.read_csv("C:/Learning/MS Degree/MIS542/titanic.csv", delimiter=',',engine='python')
+data=pd.DataFrame(data)
+print
+
+# currConvert =pd.DataFrame([[1, 1.00, 'GBP'],[2, 1.28, 'USD']], columns=['id','value', 'currency'])
+data['currency']='GBP'
+data['Fare in USD']= data["Fare in British Pounds"] * 1.28
+
+avgCost = data["Fare in USD"].mean()
+avgCostFirstClass = data.loc[data['Passenger Class'] == 1, "Fare in USD"].mean()
+hasSibling = data['Name'].loc[(data['Siblings/Spouses Aboard'] > 1) & (data['Age'] > 19)].count()
+hasSiblingAlive = data['Name'].loc[(data['Siblings/Spouses Aboard'] > 1) & (data['Age'] > 19) & (data['Survived'] == 1)].count()
+hasSiblingDeceased = data['Name'].loc[(data['Siblings/Spouses Aboard'] > 1) & (data['Age'] > 19) & (data['Survived'] == 0)].count()
+meanAgeDeceased = data.loc[data['Survived'] == 0, "Age"].mean()
+meanAgeSurvived = data.loc[data['Survived'] == 1, "Age"].mean()
+
+
+print('Average Cost')
+print(avgCost)
+print('Average First Class Cost')
+print(avgCostFirstClass)
+print('Count Of Passengers 20 And Over With Siblings')
+print(hasSibling)
+print('Additional Question 1: Show Count Of Surviving Passengers 20 And Over With Siblings')
+print(hasSiblingAlive)
+print('Additional Question 2: Show Count Of Deceased Passengers 20 And Over With Siblings')
+print(hasSiblingDeceased)
+print('Average age of Deceased')
+print(meanAgeDeceased)
+print('Average age of Surviving')
+print(meanAgeSurvived)
+
+data['Gender'] = 0
+
+sex = np.array(data['Sex'])
+data.loc[data['Sex'] == 'male', 'Gender'] = 0
+data.loc[data['Sex'] == 'female', 'Gender'] = 1
+# male = data['Name'].loc[(data['Sex'] == 'male')].count()
+# female = data['Name'].loc[(data['Sex'] == 'female')].count() 
+
+
+fig, axs = plt.subplots(1,2)
+data[data.Sex=='male'].Survived.value_counts().plot(kind='barh',ax=axs[0], title='Male Survivors', ylabel="0 = Deceased; 1 = Survived")
+data[data.Sex=='female'].Survived.value_counts().plot(kind='barh',ax=axs[1], title='Female Survivors')
+
+fig, axs = plt.subplots(1,6)
+data[(data.Age<10)].Age.value_counts().plot(kind='barh',ax=axs[0], title='Under 10',figsize=(20,10), ylabel='Age')
+data[(data.Age>10) & (data.Age<20)].Age.value_counts().plot(kind='barh',ax=axs[1], title='10-19')
+data[(data.Age>10) & (data.Age<20)].Age.value_counts().plot(kind='barh',ax=axs[2], title='20-29')
+data[(data.Age>20) & (data.Age<30)].Age.value_counts().plot(kind='barh',ax=axs[3], title='30-39')
+data[(data.Age>40) & (data.Age<50)].Age.value_counts().plot(kind='barh',ax=axs[4], title='40-49')
+data[(data.Age>50) & (data.Age<60)].Age.value_counts().plot(kind='barh',ax=axs[5], title='50-59')
+plt.show(1,6)
+# data[data.Age>2].Age.value_counts().plot(kind='bar',ax=axs[1])
+
+
+
+data[(data.Age>0)].Age.round().value_counts().plot(kind='bar', title='All Ages', figsize=(20,10), xlabel = 'Age', ylabel='Count')
+
+data.loc[data['Sex'] == 'male', 'Gender'] = 1
+data.loc[data['Sex'] == 'female', 'Gender'] = 1
+data.groupby('Sex')['Gender'].sum().plot(kind='pie')
+plt.show()
+data.loc[data['Sex'] == 'male', 'Gender'] = 0
+data.loc[data['Sex'] == 'female', 'Gender'] = 1
+
+fig, axs = plt.subplots(1,2)
+data[data.Age>=18].Survived.value_counts().plot(kind='barh',ax=axs[0], title='Adults Survived', ylabel="0 = Deceased; 1 = Survived")
+data[data.Age<=17.99].Survived.value_counts().plot(kind='barh',ax=axs[1], title='Minors Survived')
+
+data.columns = data.columns.str.replace(' ','_') # Easiest way to call spaces in Pandas seems to be to replace the space.
+data.columns = data.columns.str.replace('/','_') # Replace '/'
+fig, axs = plt.subplots(1,2)
+data[data.Passenger_Class==1].Survived.value_counts().plot(kind='barh',ax=axs[0], title='First Class Survived', ylabel="0 = Deceased; 1 = Survived")
+data[data.Passenger_Class!=1].Survived.value_counts().plot(kind='barh',ax=axs[1], title='Non-First Class Survived')
+
+fig, axs = plt.subplots(1,2)
+data[data.Parents_Children_Aboard>0].Survived.value_counts().plot(kind='barh',ax=axs[0], title='Parents/Children Aboard', ylabel="0 = Deceased; 1 = Survived")
+data[data.Parents_Children_Aboard==0].Survived.value_counts().plot(kind='barh',ax=axs[1], title='No Parents/Children Aboard')
+
+data
+
